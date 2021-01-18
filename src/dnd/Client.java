@@ -38,8 +38,6 @@ public class Client {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
 
-
-
         ClientGui clientGui=new ClientGui(this);
         frame.add(clientGui);
     }
@@ -48,12 +46,12 @@ public class Client {
 
 
     public void connect(String ip,int port){
-        System.out.printf("ip: %s\nport: %d",ip,port);
+        System.out.printf("ip: %s\nport: %d\n",ip,port);
         try (
                 Socket server=new Socket(ip,port);
                 ){
             System.out.println("mi sono connesso");
-            ChatGui chatGui=new ChatGui();
+            ChatRoomsGui chatGui=new ChatRoomsGui();
             chatGui.run();
             close();
         } catch (IOException exception) {
@@ -61,6 +59,7 @@ public class Client {
         }
 
     }
+
     private void close(){
         frame.dispose();
     }
