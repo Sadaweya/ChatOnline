@@ -25,9 +25,9 @@ public class ChatRoomsGui extends JFrame implements Runnable {
 
 
 
-        JPanel chatRoomListpnl =new JPanel();
-        chatRoomListpnl.setLayout(new GridLayout(0,1));
-        frame.add(chatRoomListpnl);
+        JPanel chatRoomListPnl =new JPanel();
+        chatRoomListPnl.setLayout(new GridLayout(0,1));
+        frame.add(chatRoomListPnl);
 
         System.out.println("devo aggiungere la lista delle chats: ");
 
@@ -37,7 +37,11 @@ public class ChatRoomsGui extends JFrame implements Runnable {
         listaChats.forEach(chatRoom -> {
             System.out.printf("adding %s\n",chatRoom.getChatName());
             JButton btn=new JButton(chatRoom.getChatName());
-            chatRoomListpnl.add(btn);
+            chatRoomListPnl.add(btn);
+            btn.addActionListener(e -> {
+                ChatGui chatGui=new ChatGui(client);
+                chatGui.run();
+            });
         });
 
     }

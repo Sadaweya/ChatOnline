@@ -51,10 +51,10 @@ public class Client {
 
 
     public void connect(String ip,int port){
-        System.out.printf("ip: %s\nport: %d\n",ip,port);
+       // System.out.printf("ip: %s\nport: %d\n",ip,port);
         try {
             server=new Socket(ip,port);
-            System.out.println("mi sono connesso");
+           // System.out.println("mi sono connesso");
             ChatRoomsGui chatroomGui=new ChatRoomsGui(this);
             chatroomGui.run();
             close();
@@ -72,9 +72,9 @@ public class Client {
 
         ) {
 
-            System.out.println("sono quiiiii (client.getlistachats)");
+           // System.out.println("sono quiiiii (client.getlistachats)");
             out.println("SYSTEM_MESSAGE_GET_CHATROOMS_LIST");
-            System.out.println(" (client.getlistachats), ho passato il out.write");
+           // System.out.println(" (client.getlistachats), ho passato il out.write");
 
             return (ArrayList<ChatRoom>)inputStream.readObject();
 
