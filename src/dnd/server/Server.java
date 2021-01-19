@@ -1,10 +1,9 @@
-package dnd;
+package dnd.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
 
@@ -47,7 +46,7 @@ public class Server {
     }
 
     public static ArrayList<ChatRoom> getListaChats(){
-        System.out.printf("Stò inviando %d chats\n", listaChats.size());
+       // System.out.printf("Stò inviando %d chats\n", listaChats.size());
         return listaChats;
     }
 

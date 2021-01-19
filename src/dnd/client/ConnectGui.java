@@ -1,11 +1,13 @@
-package dnd;
+package dnd.client;
+
+import dnd.client.Client;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ClientGui extends JPanel {
+public class ConnectGui extends JPanel {
 
-    public ClientGui(Client client){
+    public ConnectGui(Client client){
 
         Dimension window=this.getSize();
 

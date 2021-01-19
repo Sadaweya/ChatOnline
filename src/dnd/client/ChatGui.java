@@ -1,4 +1,4 @@
-package dnd;
+package dnd.client;
 
 public class ChatGui {
 }

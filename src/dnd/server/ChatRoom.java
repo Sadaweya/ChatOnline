@@ -1,8 +1,11 @@
-package dnd;
+package dnd.server;
 
+import dnd.server.CommProtocol;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ChatRoom {
+public class ChatRoom implements Serializable {
     ArrayList<CommProtocol> listaPartecipanti=new ArrayList<>();
     String chatName;
 
@@ -19,6 +22,10 @@ public class ChatRoom {
     }
     public ArrayList<CommProtocol> getListaPartecipanti(){
         return listaPartecipanti;
+    }
+
+    public String getChatName(){
+        return this.chatName;
     }
 
 
