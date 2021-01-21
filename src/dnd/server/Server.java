@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class Server {
+class Server {
 
     static ArrayList<CommProtocol> listaConnessi=new ArrayList<>();
     static ArrayList<ChatRoom> listaChats=new ArrayList<>();
@@ -41,8 +41,24 @@ public class Server {
         listaChats.add(new ChatRoom(chatRoomName));
     }
 
-    public static void joinChatRoom(ChatRoom chatRoom, CommProtocol client){
+    public static void joinChatRoom(ChatRoom chatRoom, Socket client){
+        System.out.println("server.joinchatroom");
         chatRoom.addPartecipante(client);
+    }
+
+    //ritornare boolean success
+    public static void joinChatRoom(String chatRoom, Socket client){
+        ChatRoom chatRoomObj=getChatroom(chatRoom);
+        if(chatRoomObj!=null)
+            joinChatRoom(chatRoomObj,client);
+    }
+
+    private static ChatRoom getChatroom(String chatRoomName){
+        for(ChatRoom chatRoom: listaChats){
+            if(chatRoom.chatName.equals(chatRoomName))
+                return chatRoom;
+        }
+        return null;
     }
 
     public static ArrayList<ChatRoom> getListaChats(){

@@ -1,15 +1,14 @@
 package dnd.client;
 
 import dnd.server.ChatRoom;
-import dnd.server.Server;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class ChatRoomsGui extends JFrame implements Runnable {
+class ChatRoomsGui extends JFrame implements Runnable {
     private JFrame frame;
-    private Client client;
+    private final Client client;
 
     public ChatRoomsGui(Client client){
         this.client=client;
@@ -29,16 +28,17 @@ public class ChatRoomsGui extends JFrame implements Runnable {
         chatRoomListPnl.setLayout(new GridLayout(0,1));
         frame.add(chatRoomListPnl);
 
-        System.out.println("devo aggiungere la lista delle chats: ");
+       // System.out.println("devo aggiungere la lista delle chats: ");
 
         ArrayList<ChatRoom> listaChats = client.getListaChatRooms();
-        System.out.println("dimensione: "+listaChats.size());
+        //System.out.println("dimensione: "+listaChats.size());
 
         listaChats.forEach(chatRoom -> {
             System.out.printf("adding %s\n",chatRoom.getChatName());
             JButton btn=new JButton(chatRoom.getChatName());
             chatRoomListPnl.add(btn);
             btn.addActionListener(e -> {
+                client.joinChatroom(btn.getName());
                 ChatGui chatGui=new ChatGui(client);
                 chatGui.run();
             });

@@ -8,7 +8,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class Client {
+class Client {
     private JFrame frame;
     private Socket server;
 
@@ -74,7 +74,7 @@ public class Client {
 
            // System.out.println("sono quiiiii (client.getlistachats)");
             out.println("SYSTEM_MESSAGE_GET_CHATROOMS_LIST");
-           // System.out.println(" (client.getlistachats), ho passato il out.write");
+           // System.out.println(" (client.getlistachats), ho passato il out.println");
 
             return (ArrayList<ChatRoom>)inputStream.readObject();
 
@@ -83,6 +83,27 @@ public class Client {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void joinChatroom(String chatRoomName){
+        try (
+                //ObjectOutputStream outputStream = new ObjectOutputStream(server.getOutputStream());
+                //ObjectInputStream inputStream = new ObjectInputStream(server.getInputStream());
+                BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+                PrintWriter out = new PrintWriter(server.getOutputStream(), true);
+
+        ) {
+
+            System.out.println("sono quiiiii (client.joinChatRoom)");
+            out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
+            out.println(chatRoomName);
+            // System.out.println(" (client.getlistachats), ho passato il out.write");
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 

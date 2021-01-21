@@ -5,7 +5,7 @@ import dnd.client.Client;
 import javax.swing.*;
 import java.awt.*;
 
-public class ConnectGui extends JPanel {
+class ConnectGui extends JPanel {
 
     public ConnectGui(Client client){
 
