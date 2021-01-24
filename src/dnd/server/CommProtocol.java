@@ -8,30 +8,32 @@ class CommProtocol implements Runnable {
 
     //private static ArrayList<CommProtocol> clientList=new ArrayList<>();
     Socket client;
+    //ObjectInputStream inputStream;
+    //ObjectOutputStream outputStream;
 
 
 
 
     public CommProtocol(Socket client) {
         this.client = client;
+
        // clientList.add(this);
     }
 
     @Override
     public void run() {
-        try(
+        try (
                 ObjectInputStream inputStream = new ObjectInputStream(client.getInputStream());
                 ObjectOutputStream outputStream = new ObjectOutputStream(client.getOutputStream());
-                //BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                //PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-        ) {
-
-
+                ){
 
             // protocollo di comunicazione
             String request;
-            while((request = (String)inputStream.readObject()) != null) {
+            while(true) {
                 System.out.println("inizio while");
+
+                request = inputStream.readUTF();
+                //System.out.println(inputStream.readUTF());
 
                 System.out.printf("Richiesta ricevuta: %s\n", request);
 
@@ -43,15 +45,15 @@ class CommProtocol implements Runnable {
                 else if("SYSTEM_MESSAGE_GET_CHATROOMS_LIST".equals(request)){
                     System.out.println("messaggio di sistema ricevuto, invio lista chatrooms");
                     outputStream.writeObject(Server.getListaChats());
-                    System.out.println(client);
                     outputStream.flush();
                 }
 
                 else if("SYSTEM_MESSAGE_JOIN_CHATROOM".equals(request)){
-                    String temp=(String)inputStream.readObject();
+                    String temp=inputStream.readUTF();
                     System.out.println("messaggio di sistema ricevuto, joina chat "+temp);
                     Server.joinChatRoom(temp,client);
-                    //outputStream.writeObject(Server.getListaChats());
+                    outputStream.writeObject(Server.getListaChats());
+                    outputStream.flush();
                 }
 
                 else if("SYSTEM_MESSAGE_GET_CHATHISTORY".equals(request)){
@@ -61,12 +63,12 @@ class CommProtocol implements Runnable {
                     //devo ricevere la chatroom interessata
                 }
                 System.out.println("fine while");
-                System.out.println(client);
-                System.out.println("prima "+request);
-                request = (String)inputStream.readObject();//perchè request diventa null?
-                 System.out.println("seconda "+request);
-
+              //  System.out.println(client);
+               // System.out.println("prima "+request);
+               // request = (String)inputStream.readObject();//perchè request diventa null?
+               //  System.out.println("seconda "+request);
                  //break;
+
             }
 
             System.out.println("esco da while");
@@ -74,8 +76,9 @@ class CommProtocol implements Runnable {
 
 
 
-        } catch(IOException | ClassNotFoundException ex) {
-            System.out.println("exception in commprotocol");
+        } catch(IOException ex) {
+            System.out.println("exception in commprotocol "+ex);
+
             ex.printStackTrace();
         }
 

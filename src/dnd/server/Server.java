@@ -14,16 +14,17 @@ class Server {
 
     public static void main(String[] args) {
 
-        try(
+        try (
                 ServerSocket server =new ServerSocket(1234);
-        ) {
+        ){
             createChatRoom("ChatRoom "+id++);
             createChatRoom("ChatRoom "+id++);
             createChatRoom("ChatRoom "+id++);
 
             while(true){
+                System.out.println("in attesa di un client");
                 Socket client=server.accept();
-                System.out.println("connesso un client\n");
+                System.out.println("connesso un client");
                 CommProtocol protocol=new CommProtocol(client);
                 listaConnessi.add(protocol);
                 protocol.run();

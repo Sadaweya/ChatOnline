@@ -11,7 +11,8 @@ import java.util.ArrayList;
 class Client {
     private JFrame frame;
     private Socket server;
-
+    private ObjectOutputStream outputStream;
+    private ObjectInputStream inputStream;
 
     /**
      * Launch the application.
@@ -57,28 +58,24 @@ class Client {
            // System.out.println("mi sono connesso");
             ChatRoomsGui chatroomGui=new ChatRoomsGui(this);
             chatroomGui.run();
-            close();
+            closeGUI();
+            outputStream = new ObjectOutputStream(server.getOutputStream());
+            inputStream = new ObjectInputStream(server.getInputStream());
         } catch (IOException exception) {
             exception.printStackTrace();
         }
     }
 
     public ArrayList<ChatRoom> getListaChatRooms(){
-        try (
-                //ObjectOutputStream outputStream = new ObjectOutputStream(server.getOutputStream());
-                ObjectInputStream inputStream = new ObjectInputStream(server.getInputStream());
-                //BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-                PrintWriter out = new PrintWriter(server.getOutputStream(), true);
-
-        ) {
-
-           // System.out.println("sono quiiiii (client.getlistachats)");
-            out.println("SYSTEM_MESSAGE_GET_CHATROOMS_LIST");
-           // System.out.println(" (client.getlistachats), ho passato il out.println");
-
+        try{
+            // System.out.println("sono quiiiii (client.getlistachats)");
+            outputStream.writeUTF("SYSTEM_MESSAGE_GET_CHATROOMS_LIST");
+            outputStream.flush();
+            //outputStream.writeUTF("SECONDO_MESSAGGIO");
+            //outputStream.flush();
+            //out.println("SYSTEM_MESSAGE_GET_CHATROOMS_LIST");
+            //System.out.println(" (client.getlistachats), ho passato il out.writeobject");
             return (ArrayList<ChatRoom>)inputStream.readObject();
-
-
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -86,19 +83,19 @@ class Client {
     }
 
     public void joinChatroom(String chatRoomName){
-        try (
-                //ObjectOutputStream outputStream = new ObjectOutputStream(server.getOutputStream());
-                //ObjectInputStream inputStream = new ObjectInputStream(server.getInputStream());
-                BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-                PrintWriter out = new PrintWriter(server.getOutputStream(), true);
-
-        ) {
-
+        try {
             System.out.println("sono quiiiii (client.joinChatRoom)");
-            out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
-            out.println(chatRoomName);
-            // System.out.println(" (client.getlistachats), ho passato il out.write");
+            //inputStream = new ObjectInputStream(server.getInputStream());
 
+
+            outputStream.writeUTF("SYSTEM_MESSAGE_JOIN_CHATROOM");
+            outputStream.flush();
+            System.out.println(chatRoomName);
+            outputStream.writeUTF(chatRoomName);
+            outputStream.flush();
+            //out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
+            //out.println(chatRoomName);
+            // System.out.println(" (client.getlistachats), ho passato il out.write");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -106,9 +103,16 @@ class Client {
 
     }
 
+    private void closeClient(){
+        try {
+            outputStream.close();
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-
-    private void close(){
+    private void closeGUI(){
         frame.dispose();
     }
 
