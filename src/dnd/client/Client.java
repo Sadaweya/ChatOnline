@@ -86,7 +86,7 @@ class Client extends BaseModel {
         return null;
     }
 
-    public String joinChatroom(String chatRoomName){
+    public void joinChatroom(String chatRoomName){
         try {
             System.out.println("sono quiiiii (client.joinChatRoom)");
             //inputStream = new ObjectInputStream(server.getInputStream());
@@ -97,8 +97,7 @@ class Client extends BaseModel {
             System.out.println(chatRoomName);
             outputStream.writeUTF(chatRoomName);
             outputStream.flush();
-            Thread updateChat=new Thread();
-            return inputStream.readUTF();//restituisco il contenuto della chat
+            //return inputStream.readUTF();//restituisco il contenuto della chat
             //out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
             //out.println(chatRoomName);
             // System.out.println(" (client.getlistachats), ho passato il out.write");
@@ -106,7 +105,6 @@ class Client extends BaseModel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
 

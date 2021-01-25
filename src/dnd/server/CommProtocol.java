@@ -42,6 +42,7 @@ class CommProtocol implements Runnable {
                     break;
                 }
 
+                //IMPORTANTE, CAMBIA I SYSTEM MESSAGE IN  @SYSTEMMESSAGE E INSERISCILI IN UNA HASHMAP
                 else if("SYSTEM_MESSAGE_GET_CHATROOMS_LIST".equals(request)){
                     System.out.println("messaggio di sistema ricevuto, invio lista chatrooms");
                     outputStream.writeObject(Server.getListaChats());

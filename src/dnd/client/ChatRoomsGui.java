@@ -39,8 +39,8 @@ class ChatRoomsGui extends JFrame implements Runnable {
             btn.setName(chatRoom.getChatName());
             chatRoomListPnl.add(btn);
             btn.addActionListener(e -> {
-                String chatContent= client.joinChatroom(btn.getName());//ritorna null e non il nome della chat
-                ChatGui chatGui=new ChatGui(client,btn.getName(),chatContent);
+                client.joinChatroom(btn.getName());//ritorna null e non il nome della chat
+                ChatGui chatGui=new ChatGui(client,btn.getName());
                 chatGui.run();
             });
         });

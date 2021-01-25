@@ -25,10 +25,11 @@ public class ChatRoom implements Serializable {
     public void sndMsg(String utente, String body){
         chatHistory.append(String.format("\n[%s]: %s",utente,body));
         System.out.println("\n\nchathistory: "+chatHistory);
-        updateChatPartecipanti();
+        //updateChatPartecipanti();
        // CommProtocol.update(this.chatName);
     }
 
+    //metodo errato, chiude la connessione e richiede un secondo socket solo per questo
     public void updateChatPartecipanti(){
         for(Socket client: listaPartecipanti) {
             try (

@@ -14,7 +14,7 @@ class ChatGui extends JFrame implements Runnable {
     String clientName;
     String chatName;
 
-    public ChatGui(Client client, String chatName, String chatContent) {
+    public ChatGui(Client client, String chatName) {
         this.client = client;
         this.chatName = chatName;
 
@@ -52,7 +52,7 @@ class ChatGui extends JFrame implements Runnable {
         ScheduledExecutorService executorService= Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleWithFixedDelay(() ->
                 chatAreaOut.setText(client.getChatContents(chatName)),
-                10,5, TimeUnit.SECONDS);
+                0,5, TimeUnit.SECONDS);
         //IMPORTANTE, QUESTO MEDOTO INTERFERISCE CON GLI ALTRI, DEVO GESTIRE L'ACCESSO SINCRONIZZATO E
         //INSCINDIBILE ALL'IMPUT STREAM
 
