@@ -54,7 +54,7 @@ class Server {
             joinChatRoom(chatRoomObj,client);
     }
 
-    private static ChatRoom getChatroom(String chatRoomName){
+    public static ChatRoom getChatroom(String chatRoomName){
         for(ChatRoom chatRoom: listaChats){
             if(chatRoom.chatName.equals(chatRoomName))
                 return chatRoom;

@@ -1,14 +1,17 @@
 package dnd.client;
 
+import dnd.client.core.BaseModel;
 import dnd.server.ChatRoom;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.stream.BaseStream;
 
-class Client {
+class Client extends BaseModel {
     private JFrame frame;
     private Socket server;
     private ObjectOutputStream outputStream;
@@ -21,6 +24,7 @@ class Client {
         EventQueue.invokeLater(() -> {
             try {
                 Client window = new Client();
+                
                 window.frame.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -82,7 +86,7 @@ class Client {
         return null;
     }
 
-    public void joinChatroom(String chatRoomName){
+    public String joinChatroom(String chatRoomName){
         try {
             System.out.println("sono quiiiii (client.joinChatRoom)");
             //inputStream = new ObjectInputStream(server.getInputStream());
@@ -93,6 +97,8 @@ class Client {
             System.out.println(chatRoomName);
             outputStream.writeUTF(chatRoomName);
             outputStream.flush();
+            Thread updateChat=new Thread();
+            return inputStream.readUTF();//restituisco il contenuto della chat
             //out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
             //out.println(chatRoomName);
             // System.out.println(" (client.getlistachats), ho passato il out.write");
@@ -100,8 +106,55 @@ class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        return null;
     }
+
+
+    public void sendMsg(String chatRoomName,String clientName, String msg){
+        try {
+            System.out.println("sono quiiiii (client.sendMsg)");
+
+            outputStream.writeUTF("SYSTEM_MESSAGE_SND_MESSAGE");
+            outputStream.flush();
+
+            outputStream.writeUTF(chatRoomName);
+            outputStream.flush();
+
+            outputStream.writeUTF(clientName);
+            outputStream.flush();
+
+            outputStream.writeUTF(msg);
+            outputStream.flush();
+
+            getChatContents(chatRoomName);
+            fireValuesChange(new ChangeEvent(this));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getChatContents(String chatRoomName){
+        try {
+            System.out.println("sono quiiiii (client.getChatContent)");
+
+            outputStream.writeUTF("SYSTEM_MESSAGE_GET_CHAT_CONTENTS");
+            outputStream.flush();
+            //System.out.println(chatRoomName);
+            outputStream.writeUTF(chatRoomName);
+            outputStream.flush();
+            return inputStream.readUTF();
+            //out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
+            //out.println(chatRoomName);
+            // System.out.println(" (client.getlistachats), ho passato il out.write");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 
     private void closeClient(){
         try {
