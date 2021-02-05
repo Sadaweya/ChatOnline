@@ -9,6 +9,8 @@ import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.BaseStream;
 
 class Client extends BaseModel {
@@ -16,6 +18,9 @@ class Client extends BaseModel {
     private Socket server;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
+    private static boolean permit;
+    Semaphore semaphore;
+
 
     /**
      * Launch the application.
@@ -37,6 +42,8 @@ class Client extends BaseModel {
      */
     public Client() {
         initialize();
+        permit=false;
+        semaphore = new Semaphore(1);
     }
 
     /**
@@ -58,101 +65,153 @@ class Client extends BaseModel {
     public void connect(String ip,int port){
        // System.out.printf("ip: %s\nport: %d\n",ip,port);
         try {
-            server=new Socket(ip,port);
-           // System.out.println("mi sono connesso");
-            ChatRoomsGui chatroomGui=new ChatRoomsGui(this);
-            chatroomGui.run();
-            closeGUI();
-            outputStream = new ObjectOutputStream(server.getOutputStream());
-            inputStream = new ObjectInputStream(server.getInputStream());
-        } catch (IOException exception) {
+            permit = semaphore.tryAcquire(3, TimeUnit.SECONDS);
+            if(permit){
+                server = new Socket(ip,port);
+                // System.out.println("mi sono connesso");
+                ChatRoomsGui chatroomGui=new ChatRoomsGui(this);
+                chatroomGui.run();
+                closeGUI();
+                outputStream = new ObjectOutputStream(server.getOutputStream());
+                inputStream = new ObjectInputStream(server.getInputStream());
+            }
+        } catch (IOException | InterruptedException exception) {
             exception.printStackTrace();
+        }finally {
+            if(permit){
+                semaphore.release();
+                permit=false;
+            }
         }
     }
 
     public ArrayList<ChatRoom> getListaChatRooms(){
         try{
-            // System.out.println("sono quiiiii (client.getlistachats)");
-            outputStream.writeUTF("SYSTEM_MESSAGE_GET_CHATROOMS_LIST");
-            outputStream.flush();
-            //outputStream.writeUTF("SECONDO_MESSAGGIO");
-            //outputStream.flush();
-            //out.println("SYSTEM_MESSAGE_GET_CHATROOMS_LIST");
-            //System.out.println(" (client.getlistachats), ho passato il out.writeobject");
-            return (ArrayList<ChatRoom>)inputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+            permit = semaphore.tryAcquire(3, TimeUnit.SECONDS);
+            if(permit){
+                // System.out.println("sono quiiiii (client.getlistachats)");
+                outputStream.writeUTF("!SYSTEM_MESSAGE@GET_CHATROOMS_LIST");
+                outputStream.flush();
+                //outputStream.writeUTF("SECONDO_MESSAGGIO");
+                //outputStream.flush();
+                //out.println("SYSTEM_MESSAGE_GET_CHATROOMS_LIST");
+                //System.out.println(" (client.getlistachats), ho passato il out.writeobject");
+                return (ArrayList<ChatRoom>)inputStream.readObject();
+            }
+        } catch (IOException | ClassNotFoundException | InterruptedException e) {
             e.printStackTrace();
+        }finally {
+            if(permit){
+                semaphore.release();
+                permit=false;
+            }
         }
         return null;
     }
 
     public void joinChatroom(String chatRoomName){
         try {
-            System.out.println("sono quiiiii (client.joinChatRoom)");
-            //inputStream = new ObjectInputStream(server.getInputStream());
+            permit = semaphore.tryAcquire(3, TimeUnit.SECONDS);
+            if(permit){
+                System.out.println("sono quiiiii (client.joinChatRoom)");
+                //inputStream = new ObjectInputStream(server.getInputStream());
 
 
-            outputStream.writeUTF("SYSTEM_MESSAGE_JOIN_CHATROOM");
-            outputStream.flush();
-            System.out.println(chatRoomName);
-            outputStream.writeUTF(chatRoomName);
-            outputStream.flush();
-            //return inputStream.readUTF();//restituisco il contenuto della chat
-            //out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
-            //out.println(chatRoomName);
-            // System.out.println(" (client.getlistachats), ho passato il out.write");
+                outputStream.writeUTF("!SYSTEM_MESSAGE@JOIN_CHATROOM"
+                        .concat("@")
+                        .concat(chatRoomName));
+                outputStream.flush();
+                //System.out.println(chatRoomName);
+                //outputStream.writeUTF(chatRoomName);
+                //outputStream.flush();
+                //return inputStream.readUTF();//restituisco il contenuto della chat
+                //out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
+                //out.println(chatRoomName);
+                // System.out.println(" (client.getlistachats), ho passato il out.write");
+            }
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            if(permit){
+                semaphore.release();
+                permit=false;
+            }
         }
     }
 
-
     public void sendMsg(String chatRoomName,String clientName, String msg){
         try {
-            System.out.println("sono quiiiii (client.sendMsg)");
+            permit = semaphore.tryAcquire(3, TimeUnit.SECONDS);
+            if(permit){
+                System.out.println("sono quiiiii (client.sendMsg)");
 
-            outputStream.writeUTF("SYSTEM_MESSAGE_SND_MESSAGE");
-            outputStream.flush();
+                outputStream.writeUTF("!SYSTEM_MESSAGE@SND_MESSAGE"
+                        .concat("@")
+                        .concat(chatRoomName)
+                        .concat("@")
+                        .concat(clientName)
+                        .concat("@")
+                        .concat(msg));
+                outputStream.flush();
 
-            outputStream.writeUTF(chatRoomName);
-            outputStream.flush();
+                //  outputStream.writeUTF(chatRoomName);
+                //  outputStream.flush();
 
-            outputStream.writeUTF(clientName);
-            outputStream.flush();
+                // outputStream.writeUTF(clientName);
+                // outputStream.flush();
 
-            outputStream.writeUTF(msg);
-            outputStream.flush();
+                // outputStream.writeUTF(msg);
+                // outputStream.flush();
 
-            getChatContents(chatRoomName);
-            fireValuesChange(new ChangeEvent(this));
+                //getChatContents(chatRoomName);
+                //  fireValuesChange(new ChangeEvent(this));
+            }
 
-        } catch (IOException e) {
+
+
+
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        }finally {
+            if(permit){
+                semaphore.release();
+                permit=false;
+            }
         }
     }
 
     public String getChatContents(String chatRoomName){
         try {
-            System.out.println("sono quiiiii (client.getChatContent)");
+            permit = semaphore.tryAcquire(3, TimeUnit.SECONDS);
+            if(permit){
+                System.out.println("sono quiiiii (client.getChatContent)");
 
-            outputStream.writeUTF("SYSTEM_MESSAGE_GET_CHAT_CONTENTS");
-            outputStream.flush();
-            //System.out.println(chatRoomName);
-            outputStream.writeUTF(chatRoomName);
-            outputStream.flush();
-            return inputStream.readUTF();
-            //out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
-            //out.println(chatRoomName);
-            // System.out.println(" (client.getlistachats), ho passato il out.write");
+                outputStream.writeUTF("!SYSTEM_MESSAGE@GET_CHAT_CONTENTS"
+                        .concat("@")
+                        .concat(chatRoomName));
+                outputStream.flush();
+                //System.out.println(chatRoomName);
+                //outputStream.writeUTF(chatRoomName);
+                // outputStream.flush();
+                String temp=inputStream.readUTF();
+                System.out.println(temp);
+                return temp;
+                //out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
+                //out.println(chatRoomName);
+                // System.out.println(" (client.getlistachats), ho passato il out.write");
+            }
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        }finally {
+            if(permit){
+                semaphore.release();
+                permit=false;
+            }
         }
         return null;
     }
-
-
 
     private void closeClient(){
         try {

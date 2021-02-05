@@ -2,12 +2,18 @@ package dnd.server;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.*;
 
 class CommProtocol implements Runnable {
 
     //private static ArrayList<CommProtocol> clientList=new ArrayList<>();
     Socket client;
+    HashMap<String,HashMap<String,Exec>> commands;
+    HashMap<String,Exec> systemCommands;
+    ObjectInputStream inputStream;
+    ObjectOutputStream outputStream;
+    private boolean run;
+
     //ObjectInputStream inputStream;
     //ObjectOutputStream outputStream;
 
@@ -16,77 +22,96 @@ class CommProtocol implements Runnable {
 
     public CommProtocol(Socket client) {
         this.client = client;
+        commands=new HashMap<>();
+        systemCommands= new HashMap<>();
+        run=true;
+
+        try {
+            inputStream = new ObjectInputStream(client.getInputStream());
+            outputStream = new ObjectOutputStream(client.getOutputStream());
+
+            systemCommands.put("GET_CHATROOMS_LIST",(s -> {
+                System.out.println(s);
+                System.out.println("messaggio di sistema ricevuto, invio lista chatrooms");
+                outputStream.writeObject(Server.getListaChats());
+                outputStream.flush();
+            }));
+            systemCommands.put("JOIN_CHATROOM",(chatroomName -> {
+                System.out.println("messaggio di sistema ricevuto, joina chat "+ chatroomName);
+                Server.joinChatRoom(chatroomName.peek(),client);
+                outputStream.writeUTF(
+                        Server.getChatroom(chatroomName.poll()).chatHistory.toString()
+                );
+                outputStream.flush();
+            }));
+            systemCommands.put("SND_MESSAGE",(attributes->{
+                System.out.println("messaggio di sistema ricevuto, send message ");
+                String chatRoomName=attributes.poll();
+                String clientName=attributes.poll();
+                String msg=attributes.poll();
+                System.out.printf("[%s][%s]: %s\n",chatRoomName,clientName,msg);
+                Server.getChatroom(chatRoomName).sndMsg(clientName,msg);
+                    }));
+            systemCommands.put("GET_CHAT_CONTENTS",(chatRoomName -> {
+                System.out.println("messaggio di sistema ricevuto, invio chat");
+                String temp=Server.getChatroom(chatRoomName.poll()).chatHistory.toString();
+                System.out.println(temp);
+                outputStream.writeObject(temp);//devo inviare la chat della chatroom selezionata
+                outputStream.flush();
+            }));
+            systemCommands.put("QUIT",(s -> {
+                System.out.println("messaggio di sistema ricevuto, quit");
+                close();
+            }));
+
+            commands.put("!SYSTEM_MESSAGE", systemCommands);
+
+        } catch (IOException e) {
+            System.out.println("exception in commprotocol systemcommands"+e);
+
+            e.printStackTrace();
+        }
+
 
        // clientList.add(this);
     }
 
     @Override
     public void run() {
-        try (
-                ObjectInputStream inputStream = new ObjectInputStream(client.getInputStream());
-                ObjectOutputStream outputStream = new ObjectOutputStream(client.getOutputStream());
-                ){
+        try {
 
             // protocollo di comunicazione
             String request;
-            while(true) {
-                System.out.println("inizio while");
+            while(run) {
+                synchronized (this){
+                    System.out.println("inizio while");
+                    request = inputStream.readUTF();
 
-                request = inputStream.readUTF();
-                //System.out.println(inputStream.readUTF());
+                    //System.out.println(i nputStream.readUTF());
 
-                System.out.printf("Richiesta ricevuta: %s\n", request);
+                    System.out.printf("Richiesta ricevuta: %s\n", request);
 
-                if("quit".equals(request)) {
-                    System.out.printf("\nRichiesta di uscire dal servziio...\n");
-                    break;
-                }
+                    LinkedList<String> istruzioni = new LinkedList<>(Arrays.asList(request.split("@")));
 
-                //IMPORTANTE, CAMBIA I SYSTEM MESSAGE IN  @SYSTEMMESSAGE E INSERISCILI IN UNA HASHMAP
-                else if("SYSTEM_MESSAGE_GET_CHATROOMS_LIST".equals(request)){
-                    System.out.println("messaggio di sistema ricevuto, invio lista chatrooms");
-                    outputStream.writeObject(Server.getListaChats());
-                    outputStream.flush();
-                }
+                    commands.get(istruzioni.poll())
+                            .get(istruzioni.poll())
+                            .exec(istruzioni);
 
-                else if("SYSTEM_MESSAGE_JOIN_CHATROOM".equals(request)){
-                    String chatroomName=inputStream.readUTF();
-                    System.out.println("messaggio di sistema ricevuto, joina chat "+chatroomName);
-                    Server.joinChatRoom(chatroomName,client);
-                    outputStream.writeUTF(
-                            Server.getChatroom(chatroomName).chatHistory.toString()
-                    );
-                    outputStream.flush();
+
+                    //importante concorrenza
+                    //i messaggi successivi sovrascrivono i precedenti?
+
+                    System.out.println("fine while");
+                    //  System.out.println(client);
+                    // System.out.println("prima "+request);
+                    // request = (String)inputStream.readObject();//perchè request diventa null?
+                    //  System.out.println("seconda "+request);
+                    //break;
 
                 }
-
-                else if("SYSTEM_MESSAGE_SND_MESSAGE".equals(request)){
-                    System.out.println("messaggio di sistema ricevuto, send message ");
-                    String chatRoomName=inputStream.readUTF();
-                    String clientName=inputStream.readUTF();
-                    String msg=inputStream.readUTF();
-                    System.out.printf("[%s][%s]: %s\n",chatRoomName,clientName,msg);
-                    Server.getChatroom(chatRoomName).sndMsg(clientName,msg);
-                    //updateChatroom(chatRoomName);
+                //System.out.println("esco da while");
                 }
 
-                else if("SYSTEM_MESSAGE_GET_CHAT_CONTENTS".equals(request)){
-                    System.out.println("messaggio di sistema ricevuto, invio chat");
-                    String chatRoomName=inputStream.readUTF();
-                    outputStream.writeObject(Server.getChatroom(chatRoomName).chatHistory);//devo inviare la chat della chatroom selezionata
-                }
-
-
-                System.out.println("fine while");
-              //  System.out.println(client);
-               // System.out.println("prima "+request);
-               // request = (String)inputStream.readObject();//perchè request diventa null?
-               //  System.out.println("seconda "+request);
-                 //break;
-
-            }
-
-            System.out.println("esco da while");
 
 
 
@@ -103,6 +128,17 @@ class CommProtocol implements Runnable {
     private void updateChatroom(String chatRoomName){
         //Server.getChatroom(chatRoomName).getListaPartecipanti().forEach();
         //ricevo la lista dei socket connessi alla chat, devo inviare a ognuno di loro l'evento
+    }
+
+    private void close(){
+        try {
+            run=false;
+            outputStream.close();
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public enum SystemMessages{

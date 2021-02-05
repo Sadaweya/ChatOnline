@@ -12,7 +12,7 @@ public class ChatRoom implements Serializable {
     public ChatRoom(String chatName) {
         this.chatName = chatName;
         chatHistory= new StringBuilder();
-        chatHistory.append("this chat is not cripted yet");
+        chatHistory.append("this chat is not cripted yet\n");
     }
 
     //da void to boolean per ritornare se successo o meno
@@ -41,6 +41,7 @@ public class ChatRoom implements Serializable {
             }
         }
     }
+
 
 
     public String getChatContent(){

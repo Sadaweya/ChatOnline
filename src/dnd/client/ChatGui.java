@@ -17,7 +17,6 @@ class ChatGui extends JFrame implements Runnable {
     public ChatGui(Client client, String chatName) {
         this.client = client;
         this.chatName = chatName;
-
         this.clientName = "Client "+ Math.random();
     }
 
@@ -33,26 +32,26 @@ class ChatGui extends JFrame implements Runnable {
         JPanel chatPnl =new JPanel();
         frame.add(chatPnl);
         chatPnl.setLayout(new BorderLayout());
-        JPanel chatPnlOut=new JPanel();
+        ChatHistoryPanel chatPnlOut=new ChatHistoryPanel(client,chatName);
         JPanel chatPnlIn=new JPanel();
         chatPnl.add(chatPnlIn,BorderLayout.SOUTH);
         chatPnl.add(chatPnlOut,BorderLayout.CENTER);
-        JLabel chatAreaOut= new JLabel();
         JTextField chatAreaIn= new JTextField();
-        chatAreaOut.setPreferredSize(new Dimension(frame.getWidth()*9/10,frame.getHeight()*9/10));
         chatAreaIn.setPreferredSize(new Dimension(frame.getWidth()*7/10,frame.getHeight()/10));
-        chatPnlOut.add(chatAreaOut);
+       // chatAreaOut.setPreferredSize(new Dimension(frame.getWidth()*9/10,frame.getHeight()*9/10));
 
         chatPnlIn.add(chatAreaIn,BorderLayout.LINE_START);
         JButton inviaBtn = new JButton("SEND");
         inviaBtn.setPreferredSize(new Dimension(frame.getWidth()*2/10,frame.getHeight()/10));
         chatPnlIn.add(inviaBtn,BorderLayout.LINE_END);
 
-
+/*
         ScheduledExecutorService executorService= Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleWithFixedDelay(() ->
                 chatAreaOut.setText(client.getChatContents(chatName)),
                 0,5, TimeUnit.SECONDS);
+
+ */
         //IMPORTANTE, QUESTO MEDOTO INTERFERISCE CON GLI ALTRI, DEVO GESTIRE L'ACCESSO SINCRONIZZATO E
         //INSCINDIBILE ALL'IMPUT STREAM
 
@@ -66,6 +65,8 @@ class ChatGui extends JFrame implements Runnable {
         });
 
     }
+
+ 
 
 
     @Override
