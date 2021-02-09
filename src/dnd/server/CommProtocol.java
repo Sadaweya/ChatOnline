@@ -56,7 +56,7 @@ class CommProtocol implements Runnable {
                 System.out.println("messaggio di sistema ricevuto, invio chat");
                 String temp=Server.getChatroom(chatRoomName.poll()).chatHistory.toString();
                 System.out.println(temp);
-                outputStream.writeObject(temp);//devo inviare la chat della chatroom selezionata
+                outputStream.writeUTF(temp);//PROBLEMA QUI, LATO SERVER RICEVE LA CHAT GIUSTA MA NON VIENE INVIATA
                 outputStream.flush();
             }));
             systemCommands.put("QUIT",(s -> {

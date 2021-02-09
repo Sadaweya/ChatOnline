@@ -4,6 +4,8 @@ import dnd.server.ChatRoom;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 class ChatRoomsGui extends JFrame implements Runnable {
@@ -19,6 +21,13 @@ class ChatRoomsGui extends JFrame implements Runnable {
         frame=new JFrame();
         frame.setBounds(100, 100, 450, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                super.windowClosed(e);
+                client.closeClient();
+            }
+        });
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 

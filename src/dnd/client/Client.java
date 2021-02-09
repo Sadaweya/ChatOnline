@@ -194,7 +194,7 @@ class Client extends BaseModel {
                 //System.out.println(chatRoomName);
                 //outputStream.writeUTF(chatRoomName);
                 // outputStream.flush();
-                String temp=inputStream.readUTF();
+                String temp=inputStream.readUTF();//PROBLEMA QUI ---->EOFEx
                 System.out.println(temp);
                 return temp;
                 //out.println("SYSTEM_MESSAGE_JOIN_CHATROOM");
@@ -213,12 +213,23 @@ class Client extends BaseModel {
         return null;
     }
 
-    private void closeClient(){
+    // devo sistemare la chiusura
+    public void closeClient(){
         try {
-            outputStream.close();
-            inputStream.close();
+            if(permit){
+                outputStream.writeUTF("!SYSTEM_MESSAGE@QUIT");
+                outputStream.flush();
+
+                outputStream.close();
+                inputStream.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            if(permit){
+                semaphore.release();
+                permit=false;
+            }
         }
     }
 
